@@ -1,4 +1,9 @@
 .DS_Store
 
-# Built by build.sh
-build/
+# Built by macos/build.sh
+macos/build/
+
+# Built by windows/build.sh (build/), and .NET's own intermediate output (bin/, obj/)
+windows/build/
+windows/bin/
+windows/obj/

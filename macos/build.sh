@@ -1,7 +1,7 @@
 #!/bin/zsh
 # Builds Tide.app, signs it, and installs it to /Applications (quitting a running copy first).
-#   ./build.sh               build, install and open
-#   ./build.sh --no-install  build only (build/Tide.app)
+#   macos/build.sh               build, install and open
+#   macos/build.sh --no-install  build only (macos/build/Tide.app)
 set -e
 DIR="${0:A:h}"
 BUNDLE_ID="io.ruiying.Tide"
