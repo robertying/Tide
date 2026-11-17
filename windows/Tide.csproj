@@ -14,6 +14,7 @@
     <RootNamespace>Tide</RootNamespace>
     <AssemblyName>Tide</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Tide.ico</ApplicationIcon>
     <Version>0.1.0</Version>
     <Product>Tide</Product>
 

@@ -1,3 +1,5 @@
+<img src="icon/tide.svg" alt="Tide icon" width="128" align="right">
+
 # Tide
 
 A small menu bar (macOS) and notification area (Windows) app for a desk setup with a TV or external display.

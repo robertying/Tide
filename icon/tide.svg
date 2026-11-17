@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#16324f"/><stop offset="1" stop-color="#07131f"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.45" r="0.6">
+      <stop offset="0" stop-color="#ffe9b0"/><stop offset="1" stop-color="#f6b45a"/>
+    </radialGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f6b45a" stop-opacity="0.45"/><stop offset="1" stop-color="#f6b45a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="w1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4fd1c5"/><stop offset="1" stop-color="#1d8fa8"/>
+    </linearGradient>
+    <linearGradient id="w2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a7fb5"/><stop offset="1" stop-color="#0d3c63"/>
+    </linearGradient>
+    <clipPath id="sq"><rect x="100" y="100" width="824" height="824" rx="185"/></clipPath>
+  </defs>
+  <g clip-path="url(#sq)">
+    <rect x="100" y="100" width="824" height="824" fill="url(#bg)"/>
+    <circle cx="512" cy="500" r="330" fill="url(#halo)"/>
+    <circle cx="512" cy="480" r="150" fill="url(#sun)"/>
+    <!-- back wave -->
+    <path d="M100 560 C 200 500, 300 500, 400 555 S 600 610, 700 555 S 860 500, 924 540 V 924 H 100 Z" fill="url(#w1)"/>
+    <!-- front wave -->
+    <path d="M100 660 C 210 610, 310 612, 420 660 S 630 712, 730 660 S 860 620, 924 650 V 924 H 100 Z" fill="url(#w2)"/>
+    <path d="M100 760 C 220 725, 330 728, 440 765 S 640 805, 740 765 S 870 735, 924 755 V 924 H 100 Z" fill="#071d33" opacity="0.7"/>
+  </g>
+</svg>
