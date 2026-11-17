@@ -1,4 +1,4 @@
-<img src="icon/tide.svg" alt="Tide icon" width="128" align="right">
+<img src="icon/tide.svg" alt="Tide icon" width="96">
 
 # Tide
 
