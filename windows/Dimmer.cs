@@ -19,6 +19,7 @@ sealed class Dimmer : IDisposable {
     bool dimmed, fading;
     double from, to, seconds;
     DateTime fadeStart, nextCheck = DateTime.MinValue, previewUntil = DateTime.MinValue;
+    DateTime heldAt = DateTime.MinValue;   // last check that found a reason to stay awake
     string? holdReason;
 
     public event Action? StatusChanged;
@@ -94,7 +95,7 @@ sealed class Dimmer : IDisposable {
                 if (!wake && now >= nextCheck) {
                     nextCheck = now.AddSeconds(5);
                     var reason = keepAwake.Reason(checkFullScreen: false);
-                    if (reason != null) { wake = true; SetHold(reason); }
+                    if (reason != null) { wake = true; heldAt = now; SetHold(reason); }
                 }
                 if (wake) { Wake(); Log.Write("restored"); }
             } else if (idle >= settings.DimAfter) {
@@ -102,7 +103,10 @@ sealed class Dimmer : IDisposable {
                     nextCheck = now.AddSeconds(5);
                     var reason = keepAwake.Reason(checkFullScreen: true);
                     SetHold(reason);
-                    if (reason == null) { Dim(); Log.Write($"dimmed to {settings.DimLevel:P0}"); }
+                    // A reason to stay awake counts as activity: when it ends (a video stops, an app
+                    // quits), the countdown starts from then rather than from the last input.
+                    if (reason != null) heldAt = now;
+                    else if ((now - heldAt).TotalSeconds >= settings.DimAfter) { Dim(); Log.Write($"dimmed to {settings.DimLevel:P0}"); }
                 }
             } else {
                 SetHold(null);

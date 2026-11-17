@@ -7,7 +7,6 @@ DIR="${0:A:h}"
 BUNDLE_ID="io.ruiying.Tide"
 APP="$DIR/build/Tide.app"
 DEST="/Applications/Tide.app"
-OLD_DEST="$HOME/Applications/Tide.app"  # earlier builds installed here
 
 echo "Compiling…"
 rm -rf "$APP"
@@ -15,6 +14,7 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 swiftc -O -swift-version 5 -target "$(uname -m)-apple-macos14.0" \
   "$DIR"/Sources/*.swift -o "$APP/Contents/MacOS/Tide"
 cp "$DIR/Info.plist" "$APP/Contents/Info.plist"
+cp "$DIR/Tide.icns" "$APP/Contents/Resources/Tide.icns"
 
 # Sign with a stable identity so the Accessibility grant and Keychain access survive rebuilds
 # (an ad-hoc signature changes every build, and macOS then drops the grant).
@@ -36,7 +36,6 @@ if pgrep -xq Tide; then
   for _ in {1..40}; do pgrep -xq Tide || break; sleep 0.25; done
 fi
 
-rm -rf "$OLD_DEST"
 rm -rf "$DEST"
 cp -R "$APP" "$DEST"
 open "$DEST"

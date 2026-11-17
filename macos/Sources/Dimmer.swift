@@ -126,7 +126,7 @@ final class Dimmer {
         if idle < limit { held = false }
 
         // An app keeping the display awake counts as activity: when it lets go (a video ends, an app
-        // under test quits), the countdown starts from then rather than from the last input.
+        // quits), the countdown starts from then rather than from the last input.
         let blocked = Dimmer.displaySleepBlocked()
         if blocked { blockedAt = now() }
         let sinceBlocked = blockedAt.map { now() - $0 } ?? .infinity

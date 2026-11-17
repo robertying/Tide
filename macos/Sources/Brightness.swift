@@ -60,7 +60,8 @@ enum Brightness {
         return failed ? .failure(.setFailed) : .success(())
     }
 
-    /// `Tide brightness [level [seconds]]`, same behavior and exit codes as the old idledim `brightness` tool.
+    /// `Tide brightness [level [seconds]]`: prints the level, or fades every external display to it.
+    /// Exits 1 on bad input or no DisplayServices, 2 with no external display, 3 if the get or set fails.
     static func cli(_ args: [String]) -> Int32 {
         guard available else { fputs("DisplayServices not available\n", stderr); return 1 }
         guard !externals().isEmpty else { fputs("no external display\n", stderr); return 2 }
