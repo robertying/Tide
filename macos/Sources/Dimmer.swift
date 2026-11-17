@@ -18,6 +18,7 @@ final class Dimmer {
     private var dimLevel: Float = 0     // level of the last dim
     private var verifyUntil: TimeInterval = 0  // after a restore, watch until then for the display falling back
     private var recovering = false
+    private var blockedAt: TimeInterval?  // last poll that saw an app keeping the display awake
 
     /// Copy of the loop state for the menu, behind its own lock so reading it never waits on a fade.
     private struct Snapshot { var dimmed = false, held = false, recovering = false, saved: Float = 0 }
@@ -124,16 +125,23 @@ final class Dimmer {
         let idle = Dimmer.idleSeconds()
         if idle < limit { held = false }
 
+        // An app keeping the display awake counts as activity: when it lets go (a video ends, an app
+        // under test quits), the countdown starts from then rather than from the last input.
+        let blocked = Dimmer.displaySleepBlocked()
+        if blocked { blockedAt = now() }
+        let sinceBlocked = blockedAt.map { now() - $0 } ?? .infinity
+        let quiet = Double(idle) >= Double(limit) && sinceBlocked >= Double(limit)
+
         if dimmed {
             if let cur = Brightness.get(), abs(cur - expected) > 0.02 {
                 dimmed = false
                 held = true
                 removeState()
                 log("brightness changed manually (\(fmt(cur))), not restoring")
-            } else if idle < limit || Dimmer.displaySleepBlocked() || !enabled || paused != nil {
+            } else if idle < limit || blocked || !enabled || paused != nil {
                 restore()
             }
-        } else if enabled, paused == nil, !held, idle >= limit, !Dimmer.displaySleepBlocked() {
+        } else if enabled, paused == nil, !held, quiet {
             if let cur = Brightness.get() {
                 saved = cur
                 let warn = saved * Settings.dimFactor
