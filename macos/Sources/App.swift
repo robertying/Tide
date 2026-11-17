@@ -29,9 +29,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, NSWind
         }
 
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        let image = NSImage(systemSymbolName: "water.waves", accessibilityDescription: "Tide")
-        image?.isTemplate = true
-        statusItem.button?.image = image
+        statusItem.button?.image = MenuBarIcon.make()
         let menu = NSMenu()
         menu.delegate = self
         menu.autoenablesItems = false
