@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Drawing;
-using System.Drawing.Text;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Windows.Threading;
 using Microsoft.Win32;
@@ -37,7 +40,7 @@ sealed class Tray : IDisposable {
         };
         icon.Visible = true;
 
-        // Redraw in the right color when the taskbar switches between light and dark.
+        // Reload the icon when the display scaling (and so the icon size) may have changed.
         var dispatcher = Dispatcher.CurrentDispatcher;
         SystemEvents.UserPreferenceChanged += (_, e) => {
             if (e.Category == UserPreferenceCategory.General)
@@ -98,19 +101,21 @@ sealed class Tray : IDisposable {
         dimmer.SettingsChanged();
     }
 
-    /// The brightness glyph from the Windows icon font, black on a light taskbar and white on a dark one.
+    static readonly int[] TrayFrames = { 16, 20, 24, 32, 48, 64 };
+
+    /// The colored app icon at the notification area's icon size: the embedded frame for that size
+    /// (16 px at 100% scaling, up to 48 px at 300%), or the next larger one scaled down.
     static Icon Render() {
         int size = SystemInformation.SmallIconSize.Width;
-        bool lightTaskbar = Registry.GetValue(
-            @"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
-            "SystemUsesLightTheme", 0) is int v && v == 1;
-        using var bitmap = new Bitmap(size, size);
+        int frame = TrayFrames.FirstOrDefault(f => f >= size, TrayFrames[^1]);
+        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"Tide.tray{frame}.png")
+            ?? throw new InvalidOperationException($"missing tray icon resource for {frame} px");
+        using var source = new Bitmap(stream);
+        using var bitmap = new Bitmap(size, size, PixelFormat.Format32bppArgb);
         using (var g = Graphics.FromImage(bitmap)) {
-            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-            using var font = new Font(IconFont.Name, size * 0.8f, GraphicsUnit.Pixel);
-            using var brush = new SolidBrush(lightTaskbar ? Color.Black : Color.White);
-            using var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-            g.DrawString(IconFont.Brightness, font, brush, new RectangleF(0, 0, size, size), format);
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.PixelOffsetMode = PixelOffsetMode.Half;
+            g.DrawImage(source, new Rectangle(0, 0, size, size));
         }
         IntPtr handle = bitmap.GetHicon();
         var result = (Icon)Icon.FromHandle(handle).Clone();

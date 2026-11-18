@@ -28,4 +28,9 @@
     <!-- build.sh publishes into build/; keep it out of the project's files. -->
     <DefaultItemExcludes>$(DefaultItemExcludes);build/**</DefaultItemExcludes>
   </PropertyGroup>
+
+  <!-- The colored tray icon, one PNG per icon size (see ../icon/make-icons.sh). -->
+  <ItemGroup>
+    <EmbeddedResource Include="tray\*.png" LogicalName="Tide.%(Filename)%(Extension)" />
+  </ItemGroup>
 </Project>

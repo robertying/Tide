@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace Tide;
@@ -20,10 +22,20 @@ public partial class App : Application {
     protected override void OnStartup(StartupEventArgs e) {
         base.OnStartup(e);
 
+        // Leave a trace in tide.log if Tide dies or Windows ends the session, so a missing tray icon can be explained.
+        // The handlers only log; the crash itself still happens as before.
+        AppDomain.CurrentDomain.UnhandledException += (_, a) => Log.Write($"crash (unhandled exception, terminating={a.IsTerminating}): {a.ExceptionObject}");
+        DispatcherUnhandledException += (_, a) => Log.Write($"crash (UI thread): {a.Exception}");
+        TaskScheduler.UnobservedTaskException += (_, a) => Log.Write($"unobserved task exception: {a.Exception}");
+        SessionEnding += (_, a) => Log.Write($"session ending ({a.ReasonSessionEnding})");
+        Log.Write($"starting Tide {Assembly.GetExecutingAssembly().GetName().Version?.ToString(3)} " +
+                  $"({(e.Args.Contains("--startup") ? "at login" : "by hand")}) from {Environment.ProcessPath}");
+
         // One copy at a time. Opening Tide again brings up the running copy's Settings window.
         instance = new Mutex(true, InstanceName, out bool first);
         showRequest = new EventWaitHandle(false, EventResetMode.AutoReset, InstanceName + ".Show");
         if (!first) {
+            Log.Write("another copy is already running; asking it to show Settings");
             // This copy was just started by the user, so it may bring a window to the front; pass that on.
             Native.AllowSetForegroundWindow(Native.ASFW_ANY);
             showRequest.Set();
@@ -62,6 +74,7 @@ public partial class App : Application {
     }
 
     protected override void OnExit(ExitEventArgs e) {
+        Log.Write($"exit (code {e.ApplicationExitCode})");
         instance?.Dispose();
         base.OnExit(e);
     }

@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Regenerates ../macos/Tide.icns and ../windows/Tide.ico from tide.svg.
+# Regenerates ../macos/Tide.icns, ../windows/Tide.ico and the tray frames ../windows/tray/tray*.png from tide.svg.
 # Needs Google Chrome (to rasterize the SVG with a transparent background); the outputs are committed,
 # so building Tide doesn't need this. Run it only after editing tide.svg.
 set -e
@@ -43,4 +43,10 @@ for s, png in zip(sizes, images):
     offset += len(png)
 open(out, "wb").write(data + b"".join(images))
 PY
-echo "Wrote macos/Tide.icns and windows/Tide.ico"
+
+# Windows tray: one PNG per notification-area icon size (100%, 125%, 150%, 200%, 300% scaling), embedded in the exe.
+mkdir -p "$DIR/../windows/tray"
+for s in 16 20 24 32 48 64; do
+  sips -z $s $s "$TMP/win.png" --out "$DIR/../windows/tray/tray$s.png" >/dev/null
+done
+echo "Wrote macos/Tide.icns, windows/Tide.ico and windows/tray/tray*.png"
